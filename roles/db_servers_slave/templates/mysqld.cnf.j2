@@ -1,0 +1,15 @@
+[mysqld]
+user                    = mysql
+server-id               = 2
+log_bin                 = /var/log/mysql/mysql-bin.log
+relay_log               = /var/log/mysql/mysql-relay-bin.log
+log_error               = /var/log/mysql/error.log
+bind-address            = 0.0.0.0
+mysqlx-bind-address     = 127.0.0.1
+read-only               = ON
+gtid-mode               = ON
+enforce-gtid-consistency
+log-replica-updates
+myisam-recover-options  = BACKUP
+max_binlog_size         = 100M
+key_buffer_size         = 16M

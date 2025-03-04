@@ -1,0 +1,13 @@
+---
+apache_package_name: apache2
+apache_service: apache2
+php_package_name: libapache2-mod-php
+ssh_users: "user01 ansible"
+ssh_template_file: sshd_config_ubuntu.j2
+nginx_package_name: nginx
+nginx_service: nginx
+nfs_server_ip: "192.168.1.77"
+nfs_shared_dir: "/vol01"
+local_mount_point: "/mnt/nfs"
+mount_options: "rw,sync,hard"
+...

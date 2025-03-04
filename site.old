@@ -1,0 +1,62 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - base
+
+- hosts: nfs_clients
+  become: true
+  gather_facts: true
+  roles:
+    - nfs_clients
+
+- hosts: web_servers
+  become: true
+  gather_facts: true
+  roles:
+    - web_servers
+
+- hosts: db_servers_pre
+  become: true
+  gather_facts: true
+  roles:
+    - db_servers_pre
+
+- hosts: db_servers_master
+  become: true
+  gather_facts: true
+  roles:
+    - db_servers_master
+
+- hosts: db_servers_slave
+  become: true
+  gather_facts: true
+  roles:
+    - db_servers_slave
+
+- hosts: db_servers_post
+  become: true
+  gather_facts: true
+  roles:
+    - db_servers_post
+
+- hosts: proxy_servers
+  become: true
+  gather_facts: true
+  roles:
+    - proxy_servers
+
+- hosts: prmt_servers
+  become: true
+  gather_facts: true
+  roles:
+    - prmt_servers
+
+- hosts: elk_servers
+  become: true
+  gather_facts: true
+  roles:
+    - elk_servers
+
+...

@@ -1,0 +1,27 @@
+[web_servers]
+ubuntu03 ansible_host=192.168.1.123
+ubuntu04 ansible_host=192.168.1.45
+[db_servers_pre]
+ubuntu05 ansible_host=192.168.1.94
+ubuntu06 ansible_host=192.168.1.51
+[db_servers_master]
+ubuntu05 ansible_host=192.168.1.94
+[db_servers_slave]
+ubuntu06 ansible_host=192.168.1.51
+[db_servers_post]
+ubuntu05 ansible_host=192.168.1.94
+[db_servers_restore_db]
+ubuntu05 ansible_host=192.168.1.94
+[proxy_servers]
+ubuntu02 ansible_host=192.168.1.95 
+[elk_servers]
+ubuntu02 ansible_host=192.168.1.95
+[prmt_servers]
+ubuntu07 ansible_host=192.168.1.79
+[nfs_clients]
+ubuntu02 ansible_host=192.168.1.95
+ubuntu03 ansible_host=192.168.1.123
+ubuntu04 ansible_host=192.168.1.45
+ubuntu05 ansible_host=192.168.1.94
+ubuntu06 ansible_host=192.168.1.51
+ubuntu07 ansible_host=192.168.1.79

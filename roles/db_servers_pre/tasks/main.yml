@@ -1,0 +1,53 @@
+---
+- name: Install MySQL packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - mysql-server
+    - mysql-client
+    - python3-mysqldb
+
+- name: Ensure MySQL service is enabled and started
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    host: localhost
+    update_password: always
+
+- name: Copy scripts folder to first mysql
+  ansible.builtin.copy:
+    src: "{{ path_bkp_script_master }}"
+    dest: /scripts
+    owner: root
+    group: root
+    mode: 0744
+  delegate_to: "{{ master }}"
+  run_once: true
+
+- name: Copy scripts folder to second apache
+  ansible.builtin.copy:
+    src: "{{ path_bkp_script_slave }}"
+    dest: /scripts
+    owner: root
+    group: root
+    mode: 0744
+  delegate_to: "{{ slave }}"
+  run_once: true
+
+- name: Copy .my.cnf optfile for backup/restore script
+  template:
+    src: "{{ mycnf_template_file }}"
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+...

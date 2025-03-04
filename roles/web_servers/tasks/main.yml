@@ -1,0 +1,120 @@
+---
+- name: Install apache and php packages
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - apache2-utils
+      - ghostscript
+      - libapache2-mod-php
+      - mysql-client
+      - php8.1
+      - php8.1-fpm
+      - php-bcmath
+      - php-curl
+      - php-imagick
+      - php-intl
+      - php-json
+      - php-mbstring
+      - php8.1-mysql
+      - php-xml
+      - php-gd
+      - php-xmlrpc
+      - php-soap
+      - python3-pymysql
+      - php-zip
+    state: present
+
+- name: Start and enable apache service
+  service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: yes
+
+- name: Copy config to first apache
+  ansible.builtin.copy:
+    src: ubuntu03
+    dest: /etc/apache2/sites-available/rampri.home.conf
+    owner: root
+    group: root
+    mode: 0644
+  delegate_to: "{{ apache1 }}"
+  run_once: true
+
+- name: Copy config to second apache
+  ansible.builtin.copy:
+    src: ubuntu04
+    dest: /etc/apache2/sites-available/rampri.home.conf
+    owner: root
+    group: root
+    mode: 0644
+  delegate_to: "{{ apache2 }}"
+  run_once: true
+
+- name: Copy scripts folder to first apache
+  ansible.builtin.copy:
+    src: "{{ path_bkp_script_apache1 }}"
+    dest: /scripts
+    owner: root
+    group: root
+    mode: 0744
+  delegate_to: "{{ apache1 }}"
+  run_once: true
+
+- name: Copy scripts folder to second apache
+  ansible.builtin.copy:
+    src: "{{ path_bkp_script_apache2 }}"
+    dest: /scripts
+    owner: root
+    group: root
+    mode: 0744
+  delegate_to: "{{ apache2 }}"
+  run_once: true
+
+- name: Create document root
+  file:
+    path: "/var/www/html/{{ http_host }}"
+    state: directory
+    owner: "www-data"
+    group: "www-data"
+    mode: '0755'
+
+- name: Enable rewrite module
+  shell: /usr/sbin/a2enmod rewrite
+  notify: Reload_apache
+
+- name: Enable new site
+  shell: /usr/sbin/a2ensite "{{ http_conf }}"
+  notify: Reload_apache
+
+- name: Disable default Apache site
+  shell: /usr/sbin/a2dissite 000-default.conf
+  notify: Restart_apache
+
+- name: Download WordPress from backup to first apache
+  ansible.builtin.copy:
+    src: "{{ path_backup_first_apache }}"
+    dest: /var/www/html/
+    directory_mode: yes
+    remote_src: yes
+  delegate_to: "{{ apache1 }}"
+  run_once: true
+
+- name: Download WordPress from backup to second apache
+  ansible.builtin.copy:
+    src: "{{ path_backup_second_apache }}"
+    dest: /var/www/html/
+    directory_mode: yes
+    remote_src: yes
+  delegate_to: "{{ apache2 }}"
+  run_once: true
+
+- name: Set ownership
+  file:
+    path: /var/www
+    state: directory
+    recurse: yes
+    owner: "www-data"
+    group: "www-data"
+    mode: '0750'
+  notify: Restart_apache
+...
