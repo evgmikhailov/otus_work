@@ -16,4 +16,5 @@ cd /home/user01
 git clone https://github.com/evgmikhailov/otus_work.git
 # start playbook 
 cd /home/user01/otus_work
+chmod 0755 *.sh
 ansible-playbook  --become --ask-become-pass --vault-id @prompt site.yml
