@@ -29,7 +29,7 @@ for DB in $DATABASES; do
             --create-options \
             --disable-keys \
             --extended-insert \
-            --set-gtid-purged=OFF \
+            --set-gtid-purged=ON \
             --single-transaction \
             "$DB" "$TABLE" > "$DIR/$DB/$TABLE.sql"
     done
