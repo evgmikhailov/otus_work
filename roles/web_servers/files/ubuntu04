@@ -1,0 +1,15 @@
+<VirtualHost *:80>
+    ServerAdmin webmaster@yourdomain.com
+    DocumentRoot /var/www/html/rampri.home
+    ServerName ubuntu04.rampri.home
+    ServerAlias www.ubuntu02.rampri.home
+
+    <Directory /var/www/html/rampri.home/>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

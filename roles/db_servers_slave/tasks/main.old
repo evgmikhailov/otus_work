@@ -1,0 +1,180 @@
+---
+- name: Include custom MySQL configuration
+  template:
+    src: mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+  notify: Restart_mysql_service
+
+- name: Copy master status to slave
+  ansible.builtin.copy:
+    src: /mnt/nfs/tmp/master_status.txt
+    dest: /tmp/
+    remote_src: yes
+
+#- name: Restart MySQL service
+#  service:
+#    name: mysql
+#    state: restarted
+#  when: custom_config_result.changed
+
+- name: try to make other task
+  ansible.builtin.shell: "hostname"
+  delegate_to: ubuntu05
+  register: result
+
+- name: show result
+  ansible.builtin.debug:
+    var: result.stdout
+
+- name: Check if replication is already configured
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "SHOW SLAVE STATUS"
+  register: replication_status
+  changed_when: false
+  ignore_errors: yes
+
+- name: Debug replication status (для отладки)
+  debug:
+    var: replication_status
+  when: false
+  delegate_to: ubuntu06
+
+- name: Stop Replica if already running
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: "stopslave"
+  when:
+    - replication_status is succeeded
+    - replication_status.query_result | default([]) | length > 0
+
+- name: Set up replication on Slave
+  shell: |
+    mysql -u root -p{{ mysql_root_password }} -e "
+    CHANGE MASTER TO MASTER_HOST='{{ mysql_master_host }}',
+    MASTER_USER='{{ mysql_replication_user }}',
+    MASTER_PASSWORD='{{ mysql_replication_password }}',
+    MASTER_LOG_FILE='{{ master_log_file }}',
+    MASTER_LOG_POS={{ master_log_pos }};
+    START SLAVE;"
+  vars:
+#      master_log_file: "{{ master_status.stdout.split(' ')[0] }}"
+#      master_log_pos: "{{ master_status.stdout.split(' ')[1] }}"
+    master_log_file: "{{ lookup('file', '/mnt/nfs/tmp/master_status.txt').split(' ')[0] }}"
+    master_log_pos: "{{ lookup('file', '/mnt/nfs/tmp/master_status.txt').split(' ')[1] }}"
+  when:
+    - replication_status is succeeded
+    - replication_status.query_result | default([]) | length > 0
+
+#- name: Change master to set up replication
+#  mysql_replication:
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
+#    mode: "changemaster"
+#    master_host: "{{ mysql_master_host }}"
+#    master_user: "{{ mysql_replication_user }}"
+#    master_password: "{{ mysql_replication_password }}"
+#    master_port: "{{ mysql_master_port }}"
+#    master_log_file: "{{ mysql_master_status.File }}"
+#    master_log_pos: "{{ mysql_master_status.Position }}"
+#  when:
+#     - replication_status is succeeded
+#    - replication_status.query_result | default([]) | length > 0
+
+- name: Stop MySQL slave
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "STOP SLAVE;"
+
+- name: Reset MySQL slave
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "RESET SLAVE;"
+
+- name: Start MySQL slave
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "START SLAVE;"
+
+- name: Start Replica
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: "startslave"
+
+- name: Pause 10 sec
+  ansible.builtin.pause:
+    seconds: 10
+
+- name: Verify replication status
+  community.mysql.mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    query: "SHOW SLAVE STATUS"
+  register: final_replication_status
+  failed_when:
+    - "'Slave_IO_Running' not in final_replication_status.query_result[0]"
+    - "final_replication_status.query_result[0].Slave_IO_Running != 'Yes'"
+    - "final_replication_status.query_result[0].Slave_SQL_Running != 'Yes'"
+
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

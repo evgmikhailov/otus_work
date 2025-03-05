@@ -1,0 +1,16 @@
+---
+# Restore wp_database
+- name: Request restore
+  ansible.builtin.pause:
+    prompt: "Вы уверены, что хотите восстановить базу {{ mysql_wp_db_name }}? (yes/no)"
+  register: restore_confirmation
+  no_log: true
+
+- name: Restore database wp_database
+  ansible.builtin.shell: |
+    mysql -u {{ mysql_backup_user }} -p{{ mysql_backup_user_password }} {{ mysql_wp_db_name }} < {{ backup_path }}
+  when: restore_confirmation.user_input | lower == 'yes'
+  args:
+    executable: /bin/bash
+...
+
