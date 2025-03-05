@@ -10,8 +10,8 @@
   ansible.builtin.authorized_key:
     user: ansible
     state: present
-    key: "{{ lookup('file', '/home/user01/.ssh/ansible.pub') }}"
-#    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK18OB5n2z9hKeNT9Xs0x03Y4DmL97DlNFTLUJJT1I2C ansible"
+#    key: "{{ lookup('file', '/home/user01/.ssh/ansible.pub') }}"
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK18OB5n2z9hKeNT9Xs0x03Y4DmL97DlNFTLUJJT1I2C ansible"
 
 - name: Add sudoers file for ansible
   copy:
